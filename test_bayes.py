@@ -27,17 +27,17 @@ test_data_3 = {
 test_df_3 = pd.DataFrame(test_data_3)
 
 def test_probability():
-    assert bf.probability(test_df, 'Name', 'eq', 'David') == 0.20
-    assert bf.probability(test_df, 'Name', 'eq', 'David') != 0.10
-    assert bf.probability(test_df, 'Age', 'geq', 22) == 0.8
+    assert bf.probability(test_df, ('Name', 'eq', 'David')) == 0.20
+    assert bf.probability(test_df, ('Name', 'eq', 'David')) != 0.10
+    assert bf.probability(test_df, ('Age', 'geq', 22)) == 0.8
 
 def test_condition_indices():
-    assert len(bf.condition_indices(test_df, 'Name', 'eq', 'David')) == 1
-    assert len(bf.condition_indices(test_df, 'Age', 'geq', 22)) == 4
+    assert len(bf.condition_indices(test_df, ('Name', 'eq', 'David'))) == 1
+    assert len(bf.condition_indices(test_df, ('Age', 'geq', 22))) == 4
 
 def test_joint_probability():
-    assert bf.joint_probability(test_df, 'Name', 'eq', 'David', 'Age', 'leq', 25) == 0.2
-    assert bf.joint_probability(test_df, 'Name', 'eq', 'Bob', 'Age', 'l', 25) == 0
+    assert bf.joint_probability(test_df, [('Name', 'eq', 'David'), ('Age', 'leq', 25)]) == 0.2
+    assert bf.joint_probability(test_df, [('Name', 'eq', 'Bob'), ('Age', 'l', 25)]) == 0
 
 def test_conditional_probability():
     # given that your age is less than or equal to 25, what is the chance your name is David?
@@ -46,7 +46,7 @@ def test_conditional_probability():
 def test_bayes():
     # a runningback plays the first game of the season, and rushes for 170 yards
     # what are the odds, based on historical data, that this team is the worst in a four team league
-    assert bf.bayes(test_df_3, 'd_rank', 'eq', 4, 'yards', 'geq', 170) == 0.5
+    assert bf.bayes(test_df_3, [('d_rank', 'eq', 4), ('yards', 'geq', 170)]) == 0.5
 
 # test independence()
     # want to determine if two events are statistically independent

@@ -6,61 +6,84 @@ import logging
 # Configure logging to show messages of DEBUG level or higher
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def probability(df, col: str, operator: str, value: str) -> float:
-    # calculates the probability of a specific event
-    # later, input feedback for improper parameters
-    # how to handle null values?
+def condition_indices(df, event: tuple) -> set:
+    """
+    Returns the indices where an event occurs as a set
 
-    total_count = df[col].count()
-    if operator == 'geq':
-        cond_count = len(df.loc[df[str(col)] >= value])
-    elif operator == 'g':
-        cond_count = len(df.loc[df[col] > value])
-    elif operator == 'eq':
-        cond_count = len(df.loc[df[col] == value])
-    elif operator == 'l':
-        cond_count = len(df.loc[df[col] < value])
-    elif operator == 'leq':
-        cond_count = len(df.loc[df[col] <= value])
-    else:
-        raise ValueError("Invalid operator. Use one of: 'geq', 'g', 'eq', 'l'.")
-    return cond_count / total_count
+    Args:
+        df (pd.DataFrame): the dataframe containing the data.
+        event (tuple): A three tuple where:
+            - The first element is the column name(str).
+            - the second element is the operator (e.g., 'geq', 'eq', 'leq', etc.).
+            - the third element is the value for the condition
+            only takes one event
 
+    Returns:
+        set: The set of indices where the event occured
+    """
 
-def condition_indices(df, col, operator, value) -> set:
-    # Store the condition result based on the operator
-    # in_range operator, with value (lower bound, upper bound)
-    # want condition indices to be able to handle an arbitrary number of events
-    if operator == 'geq':
-        condition_occurs = df.index[df[col] >= value]
-    elif operator == 'g':
-        condition_occurs = df.index[df[col] > value]
-    elif operator == 'eq':
-        condition_occurs = df.index[df[col] == value]
-    elif operator == 'l':
-        condition_occurs = df.index[df[col] < value]
-    elif operator == 'leq':
-        condition_occurs = df.index[df[col] <= value]
-    elif operator == 'in_range':
+    if event[1] == 'geq':
+        condition_occurs = df.index[df[event[0]] >= event[2]]
+    elif event[1] == 'g':
+        condition_occurs = df.index[df[event[0]] > event[2]]
+    elif event[1] == 'eq':
+        condition_occurs = df.index[df[event[0]] == event[2]]
+    elif event[1] == 'l':
+        condition_occurs = df.index[df[event[0]] < event[2]]
+    elif event[1] == 'leq':
+        condition_occurs = df.index[df[event[0]] <= event[2]]
+    elif event[1] == 'in_range':
         condition_occurs = df.index[
-            (df[col] >= value[0]) & (df[col] <= value[1])
+            (df[event[1]] >= event[2][0]) & (df[event[0]] <= event[2][1])
             ]
     else:
         raise ValueError("Invalid operator. Use one of: 'geq', 'g', 'eq', 'l', 'leq', 'in_range'.")
     
     return set(condition_occurs)
 
+def probability(df, event: tuple) -> float:
+    """
+    Calculate the probability of an event occuring
 
-def joint_probability(df, col_1, operator_1, value_1, col_2, operator_2, value_2) -> float:
-    # Calculates the probability of two events occurring together
-    # handle null values
+    Args:
+        df (pd.DataFrame): the dataframe containing the data.
+        event (tuple): A three tuple where:
+            - The first element is the column name(str).
+            - the second element is the operator (e.g., 'geq', 'eq', 'leq', etc.).
+            - the third element is the value for the condition
+            only takes one event
+
+    Returns:
+        float: The probability
+    """
+
+    total_count = len(df[event[0]])     #change this from .count()
+    event_count = len(condition_indices(df, event))
+    return event_count / total_count
+
+
+def joint_probability(df, events: list[tuple]) -> float:
+    """
+    Calculate the probability of two events happening together
+
+    Args:
+        df (pd.DataFrame): the dataframe containing the data.
+        events (list[tuple]): A list of three tuples where:
+            - The first element is the column name(str).
+            - the second element is the operator (e.g., 'geq', 'eq', 'leq', etc.).
+            - the third element is the value for the condition
+            takes only two events
+
+    Returns:
+        float: The joint probability
+    """
 
     # Get the total number of rows
     total_count = len(df)
     
     # Find the indices where both conditions hold
-    condition_1_indices = condition_indices(df, col_1, operator_1, value_1)
-    condition_2_indices = condition_indices(df, col_2, operator_2, value_2)
+    condition_1_indices = condition_indices(df, events[0])
+    condition_2_indices = condition_indices(df, events[1])
     
     # Find the intersection of both conditions
     joint_indices = condition_1_indices & condition_2_indices
@@ -90,23 +113,23 @@ def conditional_probability(df, conditions: list[tuple]) -> float:
     # put in an option to print the number of rows that met the condition
     
     # Step 1: Get the indices where the event occurs (first condition in the list)
-    event_indices = condition_indices(df, conditions[0][0], conditions[0][1], conditions[0][2])
+    event_indices = condition_indices(df, conditions[0])
 
     # Step 2: Create a set for condition indices based on the first condition after the event
-    condition_indices_set = condition_indices(df, conditions[1][0], conditions[1][1], conditions[1][2])
-    logging.debug(f"Initial Condition: {condition_indices_set}")
+    condition_indices_set = condition_indices(df, conditions[1])
+    logging.info(f"Initial Condition: {condition_indices_set}")
 
     # Step 3: Check for additional conditions and find intersection of indices
     for i in range(2, len(conditions)):
-        condition_indices_set &= condition_indices(df, conditions[i][0], conditions[i][1], conditions[i][2])
-        logging.debug(f"Condition {i}: {condition_indices_set}")
+        condition_indices_set &= condition_indices(df, conditions[i])
+        logging.info(f"Condition {i}: {condition_indices_set}")
 
     # Step 4: Calculate the number of rows where the condition occurs (event space)
     event_space_size = len(condition_indices_set)
 
     # Step 5: Find the rows where both the event and conditions occur
     joint_indices = condition_indices_set & event_indices
-    logging.debug(f"Condition and Event: {joint_indices}")
+    logging.info(f"Condition and Event: {joint_indices}")
 
     # Step 6: Calculate the conditional probability
     conditional_prob = len(joint_indices) / event_space_size if event_space_size > 0 else 0
@@ -114,11 +137,23 @@ def conditional_probability(df, conditions: list[tuple]) -> float:
     return conditional_prob
 
 
-def bayes(df, col_1, operator_1, value_1, col_2, operator_2, value_2) -> float:
-    # baye's theorem
-    # P(1|2) = P(2|1) * P(1) / P(2)
-    num = conditional_probability(df, [(col_2, operator_2, value_2), (col_1, operator_1, value_1)]) * probability(df, col_1, operator_1, value_1)
-    # denominator is the overall chance of rain
-    denom = probability(df, col_2, operator_2, value_2)
+def bayes(df, conditions: list[tuple]) -> float:
+    """
+    Calculate the reverse conditional probability
 
-    return (num / denom)
+    Args:
+        df (pd.DataFrame): the dataframe containing the data.
+        events (list[tuple]): A list of two three-tuples where:
+            - The first element is the column name(str).
+            - the second element is the operator (e.g., 'geq', 'eq', 'leq', etc.).
+            - the third element is the value for the condition
+            The first tuple is the event, the second tuple is the condition         
+
+    Returns:
+        float: The conditional probability
+    """
+    numerator = conditional_probability(df, list(reversed(conditions))) * (probability(df, conditions[0]))
+    # denominator is the overall chance of rain
+    denominator = probability(df, conditions[1])
+
+    return (numerator / denominator)
