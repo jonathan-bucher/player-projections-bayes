@@ -34,12 +34,13 @@ def condition_indices(df, event: tuple) -> set:
         condition_occurs = df.index[df[event[0]] <= event[2]]
     elif event[1] == 'in_range':
         condition_occurs = df.index[
-            (df[event[1]] >= event[2][0]) & (df[event[0]] <= event[2][1])
+            (df[event[0]] >= event[2][0]) & (df[event[0]] <= event[2][1])
             ]
     else:
         raise ValueError("Invalid operator. Use one of: 'geq', 'g', 'eq', 'l', 'leq', 'in_range'.")
     
     return set(condition_occurs)
+
 
 def probability(df, event: tuple) -> float:
     """
@@ -57,7 +58,7 @@ def probability(df, event: tuple) -> float:
         float: The probability
     """
 
-    total_count = len(df[event[0]])     #change this from .count()
+    total_count = len(df[event[0]])     # changed this from .count()
     event_count = len(condition_indices(df, event))
     return event_count / total_count
 
@@ -157,3 +158,6 @@ def bayes(df, conditions: list[tuple]) -> float:
     denominator = probability(df, conditions[1])
 
     return (numerator / denominator)
+
+# want an independence function and a mutual information function
+

@@ -2,4 +2,4 @@ env
 __pycache__
 .coverage
 .pytest_cache
-betting.ipynb
+initial_exploration.ipynb
