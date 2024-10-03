@@ -2,7 +2,7 @@ NFL Quarterback Passing Yard Projections:
 
 This repository contains Python code for a statistical analysis project focused on evaluating NFL quarterbacks' likelihood of hitting the over on their projected passing yards line for a given week. The project leverages data from Pro Football Reference to determine the odds that a quarterback will exceed their line based on past performance against similar defenses. Additionally, Bayesian analysis is applied to adjust the projection based on the quarterback's recent game history.
 
-Web scraping the Pro Football Reference data, properly formatting the data by position, feature engineering, and other steps in the pipeline were completed as a seperate project, which ou can find that [here](https://github.com/jonathan-bucher/scrape_and_score).
+The majority of the data pipleine for this project, including web scraping the Pro Football Reference data, properly formatting the data by position, feature engineering, and other steps were completed as a seperate project, which you can find [here](https://github.com/jonathan-bucher/scrape_and_score).
  
 
 Features:
