@@ -1,7 +1,8 @@
 import pytest
 import pandas as pd
 import numpy as np
-import bayes_functions as bf
+import statistical_functions as sf
+import formatting_functions as ff
 
 
 test_data = {
@@ -27,26 +28,29 @@ test_data_3 = {
 test_df_3 = pd.DataFrame(test_data_3)
 
 def test_probability():
-    assert bf.probability(test_df, ('Name', 'eq', 'David')) == 0.20
-    assert bf.probability(test_df, ('Name', 'eq', 'David')) != 0.10
-    assert bf.probability(test_df, ('Age', 'geq', 22)) == 0.8
+    assert sf.probability(test_df, ('Name', 'eq', 'David')) == 0.20
+    assert sf.probability(test_df, ('Name', 'eq', 'David')) != 0.10
+    assert sf.probability(test_df, ('Age', 'geq', 22)) == 0.8
 
 def test_condition_indices():
-    assert len(bf.condition_indices(test_df, ('Name', 'eq', 'David'))) == 1
-    assert len(bf.condition_indices(test_df, ('Age', 'geq', 22))) == 4
+    assert len(sf.condition_indices(test_df, ('Name', 'eq', 'David'))) == 1
+    assert len(sf.condition_indices(test_df, ('Age', 'geq', 22))) == 4
 
 def test_joint_probability():
-    assert bf.joint_probability(test_df, [('Name', 'eq', 'David'), ('Age', 'leq', 25)]) == 0.2
-    assert bf.joint_probability(test_df, [('Name', 'eq', 'Bob'), ('Age', 'l', 25)]) == 0
+    assert sf.joint_probability(test_df, [('Name', 'eq', 'David'), ('Age', 'leq', 25)]) == 0.2
+    assert sf.joint_probability(test_df, [('Name', 'eq', 'Bob'), ('Age', 'l', 25)]) == 0
 
 def test_conditional_probability():
     # given that your age is less than or equal to 25, what is the chance your name is David?
-    assert bf.conditional_probability(test_df, [('Name', 'eq', 'David'), ('Age', 'leq', 25)]) == (1 / 3)
+    assert sf.conditional_probability(test_df, [('Name', 'eq', 'David'), ('Age', 'leq', 25)]) == (1 / 3)
 
 def test_bayes():
     # a runningback plays the first game of the season, and rushes for 170 yards
     # what are the odds, based on historical data, that this team is the worst in a four team league
-    assert bf.bayes(test_df_3, [('d_rank', 'eq', 4), ('yards', 'geq', 170)]) == 0.5
+    assert sf.bayes(test_df_3, [('d_rank', 'eq', 4), ('yards', 'geq', 170)]) == 0.5
+
+def test_quick_sort():
+    assert ff.quick_sort(list(test_data_3['yards'])) == [75, 100, 180, 200] 
 
 # test independence()
     # want to determine if two events are statistically independent
