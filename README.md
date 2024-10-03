@@ -21,8 +21,7 @@ The Bayesian model compares the quarterback to other QBs who could be expected t
 
 Data: 
 
-All data is sourced from Pro Football Reference, focusing on quarterback performance stats and defensive rankings for teams.
-Cleaning and Preparation: Data is cleaned and formatted to build a dataframe suitable for statistical analysis.
+All data is sourced from Pro Football Reference, focusing on quarterback performance stats and defensive rankings for teams. Data is cleaned and formatted to build a dataframe suitable for statistical analysis.
 
 Acknowledgments:
 
