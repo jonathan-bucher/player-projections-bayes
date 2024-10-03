@@ -4,3 +4,4 @@ __pycache__
 .pytest_cache
 initial_exploration.ipynb
 webscraping.py
+formatting_functions.py
